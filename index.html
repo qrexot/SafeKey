@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <title>SafeKeys — Менеджер паролей</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="" id="dynamic-theme">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+</head>
+<body>
+    <!-- GLOBAL HEADER -->
+    <header id="app-header" class="app-header">
+        <a href="https://t.me/strintox" target="_blank" class="app-header__link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2L2 10l9 3 3 9 7-20z"/></svg>
+            Создатель: @strintox
+        </a>
+        <a href="https://github.com/qrexot/SafeKey" target="_blank" class="app-header__link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            GitHub repo
+        </a>
+    </header>
+
+
+    <!-- AUTH -->
+    <div id="pg-auth" class="page page--active">
+        <div class="auth">
+            <svg class="auth__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h1 class="auth__title">SafeKeys</h1>
+            <p class="auth__tag">АВТОНОМНОЕ ШИФРОВАНИЕ AES-256</p>
+            <div id="v-menu" class="auth__section">
+                <button id="a-create" class="btn btn--w">Создать хранилище</button>
+                <button id="a-enter" class="btn btn--o">Войти</button>
+            </div>
+            <div id="v-entropy" class="auth__section" hidden>
+                <p class="auth__hint">Двигайте мышкой внутри области</p>
+                <div id="ent-box"><canvas id="ent-c"></canvas><span id="ent-n">0%</span></div>
+                <div class="bar"><div id="ent-f" class="bar__fill"></div></div>
+            </div>
+            <div id="v-pass" class="auth__section" hidden>
+                <p class="auth__hint" id="ph" style="margin-bottom: 24px; opacity: 0.6;">Введите мастер-пароль</p>
+                
+                <input type="text" id="pq" class="inp" placeholder="Ваш секретный вопрос (например: марка первой машины)" style="margin-bottom: 12px;" hidden>
+                
+                <div class="inp-wrap">
+                    <input type="text" id="pw" class="inp inp--mask" placeholder="Введите ответ" autocomplete="off">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+
+                <div id="pw-warn" class="auth__warn" style="margin-top: 12px; margin-bottom: 12px; font-size: 0.75rem;" hidden>
+                    <b>Внимание:</b> Если вы забудете этот ответ, данные будет <b>невозможно</b> восстановить.
+                </div>
+
+                <button id="a-go" class="btn btn--w">Продолжить</button>
+            </div>
+            <div id="v-load" class="auth__section" hidden>
+                <div class="spin"></div><p class="auth__hint">Обработка...</p>
+            </div>
+            <p id="err" class="auth__err"></p>
+            <div id="v-key" class="auth__key" hidden>
+                <span>Ключ запомнен</span>
+                <button id="a-reset" class="link link--red">Сбросить</button>
+            </div>
+        </div>
+        
+        <!-- Info Link -->
+        <button id="a-info" class="auth-info-link">Как это работает?</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="pg-dash" class="page">
+        <nav class="nav">
+            <span class="nav__brand">SafeKeys</span>
+            <div class="nav__r">
+                <button id="a-sync" class="nav__btn nav__btn--sync" title="Синхронизация с файлом">
+                    <span class="sync-dot" id="sync-dot"></span>
+                    <span id="sync-status">Синхронизация</span>
+                </button>
+                <button id="a-settings" class="nav__btn" title="Настройки">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <button id="a-exp" class="nav__btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Экспорт
+                </button>
+                <button id="a-lock" class="nav__btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    Выйти
+                </button>
+            </div>
+        </nav>
+
+        <div class="dash">
+            <div class="tabs">
+                <button class="tab tab--active" data-tab="passwords">Пароли</button>
+                <button class="tab" data-tab="2fa">2FA</button>
+                <button class="tab" data-tab="notes">Заметки</button>
+                <button class="tab" data-tab="audit">Аудит</button>
+            </div>
+
+            <!-- Storage Info -->
+            <div class="storage-bar">
+                <div class="storage-bar__info">
+                    <span id="st-text">Хранилище: 0 / 499 МБ</span>
+                    <span id="st-detail" class="storage-bar__detail">Паролей: 0 · Заметок: 0</span>
+                </div>
+                <div class="storage-track"><div id="st-fill" class="storage-fill"></div></div>
+            </div>
+            <div id="sec-passwords" class="section">
+                <div class="section__top">
+                    <input type="text" id="q" class="inp inp--s" placeholder="Поиск...">
+                    <div class="dropdown" id="s-wrap">
+                        <button type="button" class="dropdown__btn" id="s-val">Сначала новые</button>
+                        <div class="dropdown__menu" id="s-menu">
+                            <div class="dropdown__item" data-val="new">Сначала новые</div>
+                            <div class="dropdown__item" data-val="old">Сначала старые</div>
+                            <div class="dropdown__item" data-val="az">По алфавиту</div>
+                        </div>
+                        <input type="hidden" id="s" value="new">
+                    </div>
+                    <button id="a-add" class="btn btn--w">+ Добавить</button>
+                </div>
+                <div id="tag-filters" class="tag-filters"></div>
+                <div id="grid" class="grid"></div>
+                <p id="empty" class="empty-msg" hidden>Нет записей.</p>
+            </div>
+            <div id="sec-2fa" class="section" hidden>
+                <div class="section__top">
+                    <input type="text" id="q2" class="inp inp--s" placeholder="Поиск по 2FA...">
+                    <button id="a-qr-2fa" class="btn btn--o">📷 Скриншот QR</button>
+                    <button id="a-add-2fa" class="btn btn--w">+ Добавить</button>
+                    <input type="file" id="f-qr" hidden accept="image/*">
+                </div>
+                <div id="totp-grid" class="grid grid--2fa"></div>
+                <p id="empty-2fa" class="empty-msg" hidden>Нет активных 2FA ключей.</p>
+            </div>
+            <div id="sec-notes" class="section" hidden>
+                <div class="section__top">
+                    <input type="text" id="qn" class="inp inp--s" placeholder="Поиск заметок...">
+                    <button id="a-add-note" class="btn btn--w">+ Заметка</button>
+                </div>
+                <div id="notes-grid" class="grid grid--notes"></div>
+                <p id="empty-notes" class="empty-msg" hidden>Нет заметок.</p>
+            </div>
+
+            <!-- SECURITY AUDIT -->
+            <div id="sec-audit" class="section" hidden>
+                <div class="audit-summary">
+                    <h3>Здоровье паролей</h3>
+                    <div class="audit-stats">
+                        <div class="audit-stat"><span id="as-weak">0</span><p>Слабых паролей</p></div>
+                        <div class="audit-stat"><span id="as-reuse">0</span><p>Повторяющихся</p></div>
+                        <div class="audit-stat"><span id="as-old">0</span><p>Старых (>6 мес)</p></div>
+                    </div>
+                </div>
+                <div id="audit-list" class="audit-list"></div>
+                <p id="empty-audit" class="empty-msg" hidden>У вас идеальные пароли!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div id="panel" class="panel">
+        <div class="panel__inner">
+            <div class="panel__head">
+                <h2 id="p-title">Просмотр</h2>
+                <button id="p-close" class="panel__close">&times;</button>
+            </div>
+            <div id="p-view" class="panel__body">
+                <div class="detail-row">
+                    <div class="detail-label">Пароль</div>
+                    <div class="detail-value detail-value--cp">
+                        <span id="det-p"></span>
+                        <button class="cp-btn" id="cp-det-p" title="Копировать">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="detail-row" id="det-history-wrap" style="display: none;">
+                    <div class="detail-label">История паролей</div>
+                    <div id="det-history-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- JS injects history items here -->
+                    </div>
+                </div>
+            </div>
+            <div id="p-edit" class="panel__body" hidden>
+                <form id="ef">
+                    <input type="hidden" id="e-id">
+                    <label class="fld"><span>Тип записи</span>
+                        <div class="dropdown dropdown--type" id="e-type-wrap">
+                            <button type="button" class="dropdown__btn dropdown__btn--type" id="e-type-val">
+                                <span class="dropdown__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                                <span class="dropdown__text">Логин / Пароль</span>
+                            </button>
+                            <div class="dropdown__menu" id="e-type-menu">
+                                <div class="dropdown__item dropdown__item--active" data-val="login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Логин / Пароль</div>
+                                <div class="dropdown__item" data-val="totp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> 2FA Ключ</div>
+                                <div class="dropdown__item" data-val="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Банковская карта</div>
+                                <div class="dropdown__item" data-val="id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M12 11h7"/><path d="M12 15h7"/><circle cx="8" cy="11" r="2"/></svg> Документ</div>
+                                <div class="dropdown__item" data-val="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Заметка</div>
+                                <div class="dropdown__item" data-val="ssh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> SSH Ключ</div>
+                                <div class="dropdown__item" data-val="wifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg> Wi-Fi</div>
+                            </div>
+                            <input type="hidden" id="e-type" value="login">
+                        </div>
+                    </label>
+                    <label class="fld"><span>Название</span><input type="text" id="e-name" class="inp" required></label>
+                    <div id="e-fields"></div>
+                    <label class="fld"><span>Категории (через запятую)</span><input type="text" id="e-tags" class="inp" placeholder="Работа, Личное..."></label>
+                    <div class="panel__foot"><button type="button" id="e-cancel" class="btn btn--o">Отмена</button><button type="submit" class="btn btn--w">Сохранить</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD PASSWORD -->
+    <div id="modal-add" class="ov">
+        <div class="ov__box">
+            <h2>Новая запись</h2>
+            <form id="mf">
+                <input type="hidden" id="m-id">
+                <label class="fld"><span>Тип записи</span>
+                    <div class="dropdown dropdown--type" id="m-type-wrap">
+                        <button type="button" class="dropdown__btn dropdown__btn--type" id="m-type-val">
+                            <span class="dropdown__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                            <span class="dropdown__text">Логин / Пароль</span>
+                        </button>
+                        <div class="dropdown__menu" id="m-type-menu">
+                            <div class="dropdown__item dropdown__item--active" data-val="login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Логин / Пароль</div>
+                            <div class="dropdown__item" data-val="totp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> 2FA Ключ</div>
+                            <div class="dropdown__item" data-val="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Банковская карта</div>
+                            <div class="dropdown__item" data-val="id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M12 11h7"/><path d="M12 15h7"/><circle cx="8" cy="11" r="2"/></svg> Документ</div>
+                            <div class="dropdown__item" data-val="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Заметка</div>
+                            <div class="dropdown__item" data-val="ssh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> SSH Ключ</div>
+                            <div class="dropdown__item" data-val="wifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg> Wi-Fi</div>
+                        </div>
+                        <input type="hidden" id="m-type" value="login">
+                    </div>
+                </label>
+                <label class="fld"><span>Название</span><input type="text" id="m-name" class="inp" required placeholder="Например: Сбербанк, GitHub..."></label>
+                <div id="m-fields"></div>
+                <label class="fld"><span>Категории (через запятую)</span><input type="text" id="m-tags" class="inp" placeholder="Работа, Финансы..."></label>
+                <div class="ov__foot"><button type="button" id="a-cx" class="btn btn--o">Отмена</button><button type="submit" class="btn btn--w">Сохранить</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTE EDITOR -->
+    <div id="modal-note" class="ov">
+        <div class="ov__box ov__box--wide">
+            <h2 id="mn-title">Новая заметка</h2>
+            <form id="nf">
+                <input type="hidden" id="n-id">
+                <label class="fld"><span>Заголовок</span><input type="text" id="n-name" class="inp" required placeholder="Важное, Идеи..."></label>
+                <div class="fld">
+                    <span>Содержание</span>
+                    <div class="editor-toolbar">
+                        <button type="button" class="tb-btn" data-cmd="bold" title="Жирный"><b>B</b></button>
+                        <button type="button" class="tb-btn" data-cmd="italic" title="Курсив"><i>I</i></button>
+                        <button type="button" class="tb-btn" data-cmd="underline" title="Подчёркнутый"><u>U</u></button>
+                        <span class="tb-sep"></span>
+                        <button type="button" class="tb-btn" data-cmd="insertUnorderedList" title="Список">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+                        </button>
+                        <button type="button" class="tb-btn" data-cmd="formatBlock" data-val="h3" title="Заголовок">H</button>
+                        <span class="tb-sep"></span>
+                        <button type="button" class="tb-btn" id="a-img" title="Фото">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            Фото
+                        </button>
+                    </div>
+                    <div id="n-editor" class="editor" contenteditable="true"></div>
+                </div>
+                <div class="ov__foot"><button type="button" id="a-ncx" class="btn btn--o">Отмена</button><button type="submit" class="btn btn--w">Сохранить</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- IMAGE QUALITY -->
+    <div id="modal-img" class="ov">
+        <div class="ov__box ov__box--sm">
+            <h2>Качество фото</h2>
+            <div id="img-preview-wrap"><img id="img-preview" src="" alt=""></div>
+            <p id="img-info" class="img-info"></p>
+            <div class="img-options">
+                <button type="button" id="a-img-orig" class="btn btn--w">Оригинал</button>
+                <button type="button" id="a-img-comp" class="btn btn--o">Сжать (800px)</button>
+            </div>
+            <button type="button" id="a-img-cx" class="btn btn--o" style="width:100%;margin-top:10px">Отмена</button>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRM -->
+    <div id="modal-confirm" class="ov">
+        <div class="ov__box ov__box--sm confirm-box">
+            <div class="confirm-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <h2 id="cf-title">Подтверждение</h2>
+            <p id="cf-msg" class="confirm-msg">Вы уверены?</p>
+            <div class="confirm-btns">
+                <button id="cf-no" class="btn btn--o">Отмена</button>
+                <button id="cf-yes" class="btn btn--w">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN IMAGE VIEWER -->
+    <div id="lightbox" class="lightbox">
+        <button id="lb-close" class="lightbox__close">&times;</button>
+        <img id="lb-img" class="lightbox__img" src="" alt="">
+        <div class="lightbox__footer">
+            <span id="lb-info"></span>
+            <button id="lb-dl" class="btn btn--o btn--s">Скачать</button>
+        </div>
+    </div>
+
+    <!-- MODAL INFO -->
+    <div id="modal-info" class="ov">
+        <div class="ov__box ov__box--wide">
+            <h2 class="ov__box-title" style="margin-bottom: 24px; text-align: center;">Как работает SafeKeys?</h2>
+            
+            <div class="info-block">
+                <div class="info-block__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <div class="info-block__text">
+                    <h3>Принцип «Zero-Knowledge»</h3>
+                    <p>SafeKeys работает по архитектуре с «нулевым разглашением». Это значит, что приложение шифрует и дешифрует данные <b>исключительно на вашем устройстве</b>. Ни ваш пароль, ни расшифрованный ключ никогда не покидают браузер и не передаются по сети. Мы не можем увидеть ваши пароли, даже если бы очень захотели.</p>
+                </div>
+            </div>
+
+            <div class="info-block">
+                <div class="info-block__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                <div class="info-block__text">
+                    <h3>Криптография промышленного уровня</h3>
+                    <p>Для защиты данных мы используем связку <b>AES-256</b> (для контента) и алгоритм <b>PBKDF2</b> для безопасной генерации ключа из вашего пароля. Это делает невозможным чтение данных без оригинального пароля, даже если хранилище попадет в руки злоумышленников или будет физически извлечено из памяти устройства.</p>
+                </div>
+            </div>
+
+            <div class="info-block info-block--danger">
+                <div class="info-block__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="info-block__text">
+                    <h3>Единственная точка входа</h3>
+                    <p>Помните: <b>ваше слово-ответ — это единственный способ</b> расшифровать базу. У SafeKeys нет серверов для «сброса пароля через почту». Если вы забудете ответ, данные превратятся в нечитаемый зашифрованный шум. Пожалуйста, запомните пароль или запишите его в надежном оффлайн-месте.</p>
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.05); margin: 24px 0;">
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap;">
+                <a href="https://t.me/strintox" target="_blank" style="display: flex; align-items: center; gap: 10px; color: var(--c8); text-decoration: none; font-size: 0.9rem;">
+                    <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2L2 10l9 3 3 9 7-20z"/></svg>
+                    @strintox
+                </a>
+                <a href="https://github.com/qrexot/SafeKey" target="_blank" style="display: flex; align-items: center; gap: 10px; color: var(--c8); text-decoration: none; font-size: 0.9rem;">
+                    <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    GitHub Repository
+                </a>
+            </div>
+
+            <div class="ov__box-foot" style="margin-top: 32px; justify-content: center;">
+                <button id="a-info-cx" class="btn btn--o">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast"></div>
+
+    <!-- SYNC SETUP -->
+    <div id="modal-sync" class="ov">
+        <div class="ov__box ov__box--sm">
+            <h2>Настройка синхронизации</h2>
+            <div class="sync-guide">
+                <div class="sync-step"><span class="sync-num">1</span><p>Выберите или создайте файл <b>.key</b> внутри папки Google Drive, Dropbox или Яндекс.Диска</p></div>
+                <div class="sync-step"><span class="sync-num">2</span><p>SafeKeys будет <b>автоматически</b> обновлять этот файл при каждом изменении</p></div>
+                <div class="sync-step"><span class="sync-num">3</span><p>Облако само синхронизирует файл между всеми вашими устройствами</p></div>
+            </div>
+            <button type="button" id="a-sync-go" class="btn btn--w" style="width:100%;margin-top:20px">Выбрать файл</button>
+            <button type="button" id="a-sync-cx" class="btn btn--o" style="width:100%;margin-top:8px">Отмена</button>
+        </div>
+    </div>
+
+    <input type="file" id="fk" accept=".key" hidden>
+    <input type="file" id="fi" accept="image/*" hidden>
+    <!-- SETTINGS MODAL -->
+    <div id="modal-settings" class="ov">
+        <div class="ov__box" style="position: relative; padding-top: 40px;">
+            <div class="sett-credits">
+                <a href="https://github.com/qrexot/SafeKey" target="_blank" class="sett-credits__link" title="Source Code">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    GitHub
+                </a>
+                <a href="https://t.me/strintox" target="_blank" class="sett-credits__link" title="Creator Telegram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2L2 10l9 3 3 9 7-20z"/></svg>
+                    @strintox
+                </a>
+            </div>
+            <h2>Настройки</h2>
+            
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <h3>Тема оформления</h3>
+                    <p>Выберите визуальный стиль приложения.</p>
+                </div>
+                <div class="dropdown dropdown--type" id="sett-theme-wrap" style="width: 160px;">
+                    <button type="button" class="dropdown__btn dropdown__btn--type" id="sett-theme-val" style="width: 100%;">
+                        <span class="dropdown__text">По умолчанию</span>
+                    </button>
+                    <div class="dropdown__menu" id="sett-theme-menu" style="width: 100%;">
+                        <div class="dropdown__item dropdown__item--active" data-val="default">По умолчанию</div>
+                        <div class="dropdown__item" data-val="arch-linux">Arch Linux</div>
+                        <div class="dropdown__item" data-val="cyberpunk">Cyberpunk</div>
+                        <div class="dropdown__item" data-val="minecraft">8-Bit (Minecraft)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <h3>Автоблокировка</h3>
+                    <p>Автоматически выходить из хранилища при отсутствии активности (движения мыши или нажатий клавиш).</p>
+                </div>
+                <div class="dropdown dropdown--type" id="sett-lock-wrap" style="width: 160px;">
+                    <button type="button" class="dropdown__btn dropdown__btn--type" id="sett-lock-val" style="width: 100%;">
+                        <span class="dropdown__text">10 минут</span>
+                    </button>
+                    <div class="dropdown__menu" id="sett-lock-menu" style="width: 100%;">
+                        <div class="dropdown__item" data-val="1">1 минута</div>
+                        <div class="dropdown__item" data-val="5">5 минут</div>
+                        <div class="dropdown__item dropdown__item--active" data-val="10">10 минут</div>
+                        <div class="dropdown__item" data-val="0">Никогда</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <h3>Привязка к устройству</h3>
+                    <p>Зашифровать базу дополнительным ключом, который хранится <b>только в этом браузере</b>. Если вашу базу украдут, её невозможно будет открыть на другом устройстве даже с паролем.</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="sett-device-bind">
+                    <span class="toggle__slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <h3>Режим инкогнито</h3>
+                    <p>Скрывать пароли, 2FA коды и данные карт в интерфейсе. Данные можно будет только скопировать, но не увидеть глазами.</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="sett-privacy">
+                    <span class="toggle__slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <h3>История паролей</h3>
+                    <p>Автоматически сохранять старые версии паролей при их изменении. (Работает только для новых изменений)</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="sett-pass-history">
+                    <span class="toggle__slider"></span>
+                </label>
+            </div>
+            <div id="sett-bind-info" class="auth__warn" style="margin-top: 16px; margin-bottom: 0;" hidden>
+                <b>Ключ синхронизации:</b> <br>
+                <code id="sett-sync-key" style="display:block; margin: 8px 0; padding: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; font-family: var(--m); font-size: 1.1rem; text-align: center; letter-spacing: 2px;"></code>
+                Обязательно сохраните этот код! Без него вы больше <b>никогда</b> не сможете открыть свою базу на новом устройстве.
+            </div>
+
+            <div class="panel__actions" style="margin-top: 32px;">
+                <button class="btn btn--w" style="width: 100%;" id="a-settings-cx">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SYNC KEY MODAL (For migrating bound db) -->
+    <div id="modal-sync-key" class="ov">
+        <div class="ov__box">
+            <h2>Неизвестное устройство</h2>
+            <p style="color: var(--c7); font-size: 0.9rem; margin-bottom: 24px; line-height: 1.5;">
+                Эта база данных привязана к другому устройству. Чтобы открыть её здесь, введите ваш сохраненный <b>Ключ синхронизации</b>.
+            </p>
+            <div class="inp-wrap" style="margin-bottom: 24px;">
+                <input type="text" id="sync-key-inp" class="inp" placeholder="Например: SK-A1B2-C3D4" autocomplete="off" spellcheck="false">
+            </div>
+            <button id="a-sync-key-go" class="btn btn--w" style="width: 100%;">Разблокировать</button>
+            <button id="a-sync-key-cx" class="btn btn--o" style="width: 100%; margin-top: 12px; border: none;">Отмена</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
