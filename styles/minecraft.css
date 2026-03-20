@@ -1,0 +1,417 @@
+/* ====== MINECRAFT DARK (DEEPSLATE) THEME ====== */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    /* Extreme High Contrast Minecraft Palette */
+    --mc-bg: #1a1a1a;          /* Deepslate / Dark Stone base */
+    --mc-panel: #2d2d2d;       /* Main panel/card color */
+    
+    --mc-border-light: #525252;
+    --mc-border-dark: #111111;
+    --mc-border-black: #000000;
+    
+    --mc-text: #ffffff;
+    --mc-text-shadow: #000000;
+    
+    --mc-green: #55ff55;
+    --mc-yellow: #ffff55;
+    --mc-red: #ff5555;
+    --mc-blue: #5555ff;
+
+    --mc-btn: #3c3c3c;
+    --mc-btn-hover: #505050;
+
+    --rad: 0px; /* Blocky */
+}
+
+body {
+    background-color: var(--mc-bg);
+    color: var(--mc-text);
+    font-family: 'Press Start 2P', monospace;
+    margin: 0;
+    line-height: 2; /* Increased for pixel font */
+    image-rendering: pixelated;
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box !important;
+}
+
+/* Typography */
+h1, h2, h3, .nav__brand, .auth__title, .panel__head h2, .ov__box h2 {
+    font-weight: normal;
+    color: var(--mc-green);
+    text-shadow: 4px 4px 0px var(--mc-text-shadow);
+    text-transform: uppercase;
+    font-size: 1.2rem; /* Increased */
+    margin-bottom: 40px;
+    padding-top: 10px;
+}
+
+.auth__title {
+    font-size: 1.5rem;
+}
+
+/* Utility classes mapping */
+.auth__hint, .auth__tag { color: var(--mc-text); text-shadow: 2px 2px 0px #000; font-size: 0.6rem; }
+
+.fld span {
+    color: var(--mc-yellow);
+    text-shadow: 2px 2px 0px #000;
+    font-size: 0.7rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Inputs */
+.inp {
+    background: #000000 !important;
+    color: var(--mc-green) !important;
+    font-family: 'Press Start 2P', monospace !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-size: 0.9rem !important;
+    padding: 16px 20px !important;
+    box-shadow: 
+        inset 4px 4px 0px var(--mc-border-dark), 
+        inset -4px -4px 0px var(--mc-border-light) !important;
+}
+.inp:focus {
+    outline: 2px solid var(--mc-green);
+    outline-offset: -2px;
+}
+.inp::placeholder {
+    color: #555 !important;
+}
+.inp--s {
+    flex: 2 !important;
+    min-width: 200px !important;
+}
+.inp-wrap svg { display: none; }
+
+/* Buttons */
+.btn {
+    background: var(--mc-btn) !important;
+    color: var(--mc-text) !important;
+    text-shadow: 2px 2px 0px var(--mc-text-shadow) !important;
+    border: 4px solid var(--mc-border-black) !important; /* Thicker border */
+    border-radius: 0 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    text-transform: uppercase !important;
+    font-size: 0.85rem !important; /* Larger */
+    padding: 18px 26px !important; /* Thick padding */
+    cursor: pointer !important;
+    box-shadow: 
+        inset 4px 4px 0px var(--mc-border-light), 
+        inset -4px -4px 0px var(--mc-border-dark) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.nav__btn {
+    background: var(--mc-btn) !important;
+    color: var(--mc-text) !important;
+    text-shadow: 2px 2px 0px var(--mc-text-shadow) !important;
+    border: 3px solid var(--mc-border-black) !important;
+    border-radius: 0 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    text-transform: uppercase !important;
+    font-size: 0.55rem !important;
+    padding: 8px 10px !important; 
+    cursor: pointer !important;
+    box-shadow: 
+        inset 2px 2px 0px var(--mc-border-light), 
+        inset -2px -2px 0px var(--mc-border-dark) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: auto !important;
+    line-height: 1 !important;
+    flex-shrink: 1 !important;
+}
+
+.nav__r {
+    gap: 2px !important;
+    padding-right: 10px !important;
+}
+
+.btn:hover, .nav__btn:hover {
+    background: var(--mc-btn-hover) !important;
+    color: var(--mc-yellow) !important;
+}
+
+/* Modals & Panels */
+.ov {
+    background: rgba(0, 0, 0, 0.85) !important;
+    z-index: 999 !important;
+}
+/* Centered Modals (Overlay Boxes) */
+.ov__box, .auth {
+    background: var(--mc-panel) !important;
+    border: 3px solid var(--mc-border-black) !important;
+    border-radius: 0 !important;
+    box-shadow: 
+        inset 3px 3px 0px var(--mc-border-light), 
+        inset -3px -3px 0px var(--mc-border-dark),
+        12px 12px 0px rgba(0, 0, 0, 0.8) !important;
+    padding: 32px !important;
+    width: 90% !important;
+    max-width: 600px !important;
+}
+
+/* Side Panel (Settings/Details) */
+.panel {
+    background: var(--mc-panel) !important;
+    border-left: 3px solid var(--mc-border-black) !important;
+    border-radius: 0 !important;
+    box-shadow: inset 3px 0px 0px var(--mc-border-light) !important;
+    width: 600px !important;
+    max-width: 100vw !important;
+    right: -650px !important; /* Fully hidden */
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.panel--open {
+    right: 0 !important;
+}
+.auth { margin-top: 50px; }
+.auth__key {
+    background: #000;
+    box-shadow: inset 3px 3px 0px var(--mc-border-dark);
+    color: var(--mc-yellow);
+    border: none;
+    border-radius: 0;
+    padding: 12px;
+}
+.auth__warn {
+    background: #551111 !important;
+    border: 3px solid var(--mc-red) !important;
+    border-radius: 0 !important;
+    color: #fff !important;
+    box-shadow: 4px 4px 0px #000;
+}
+
+/* Cards (Entries) */
+.grid { gap: 20px; }
+.card {
+    background: var(--mc-panel);
+    border: 2px solid var(--mc-border-black);
+    border-radius: 0;
+    padding: 20px;
+    box-shadow: 
+        inset 3px 3px 0px var(--mc-border-light), 
+        inset -3px -3px 0px var(--mc-border-dark);
+}
+.card:hover {
+    background: var(--mc-btn-hover);
+    border-color: var(--mc-green);
+    transform: scale(1.02);
+}
+
+.card__icon {
+    border-radius: 0;
+    background: #000;
+    box-shadow: inset 2px 2px 0px var(--mc-border-dark);
+    border: none;
+}
+.card__icon svg { stroke: var(--mc-yellow); }
+.card__name { color: var(--mc-text); text-shadow: 2px 2px 0px #000; font-size: 0.8rem; }
+.card__date, .card__preview, .card__url { font-size: 0.5rem; color: #aaaaaa; text-shadow: 1px 1px 0px #000; }
+.card:hover .card__name { color: var(--mc-green); }
+
+/* Navigation */
+.nav {
+    background: var(--mc-panel);
+    border-bottom: 3px solid var(--mc-border-black);
+    box-shadow: 
+        inset 0 -3px 0px var(--mc-border-dark);
+}
+
+/* Detail panel content */
+.detail-label {
+    color: var(--mc-yellow);
+    text-shadow: 2px 2px 0px #000;
+    font-size: 0.6rem;
+}
+.detail-value {
+    background: #000;
+    color: var(--mc-green);
+    text-shadow: 2px 2px 0px #000;
+    border: none;
+    border-radius: 0;
+    box-shadow: inset 3px 3px 0px var(--mc-border-dark);
+}
+
+/* Tags (Chips) */
+.tag-chip {
+    background: var(--mc-btn) !important;
+    border: 3px solid var(--mc-border-black) !important;
+    box-shadow: inset 3px 3px 0px var(--mc-border-light), inset -3px -3px 0px var(--mc-border-dark) !important;
+    border-radius: 0 !important;
+    color: var(--mc-text) !important;
+    text-shadow: 2px 2px 0px #000 !important;
+    font-size: 0.75rem !important;
+    padding: 12px 18px !important;
+    margin-right: 8px !important;
+    margin-bottom: 8px !important;
+}
+.tag-chip:hover, .tag-chip--active {
+    background: var(--mc-blue) !important;
+    color: #fff !important;
+    box-shadow: inset 3px 3px 0px #7b88db, inset -3px -3px 0px #30356e !important;
+}
+
+/* Toggles */
+.toggle { width: 74px; height: 38px; }
+.toggle__slider {
+    border-radius: 0 !important;
+    background-color: #1a1a1a !important;
+    border: 4px solid #000 !important;
+    box-shadow: inset 3px 3px 0 #111;
+}
+.toggle__slider:before {
+    border-radius: 0 !important;
+    width: 28px !important;
+    height: 26px !important;
+    left: 4px !important;
+    bottom: 2px !important;
+    background-color: #7b7b7b !important;
+    box-shadow: 
+        inset 3px 3px 0 #b2b2b2, 
+        inset -3px -3px 0 #5a5a5a,
+        0 0 0 2px #000 !important;
+}
+input:checked + .toggle__slider {
+    background-color: #434343 !important;
+}
+input:checked + .toggle__slider:before {
+    transform: translateX(34px) !important;
+    background-color: var(--mc-green) !important;
+    box-shadow: 
+        inset 3px 3px 0 #afff70, 
+        inset -3px -3px 0 #3a6b10,
+        0 0 0 2px #000 !important;
+}
+
+/* Settings Items - Vertical Stack to prevent overflow */
+.setting-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    padding: 24px 0 !important;
+    border-bottom: 2px solid var(--mc-border-dark) !important;
+}
+
+.setting-item__info {
+    width: 100% !important;
+    margin-bottom: 5px;
+}
+
+.setting-item__info h3 {
+    color: var(--mc-yellow) !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 12px !important;
+}
+
+.setting-item__info p {
+    font-size: 0.65rem !important;
+    line-height: 1.8 !important;
+}
+
+/* Dropdowns in settings */
+.dropdown {
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+.dropdown--open {
+    z-index: 1000 !important;
+}
+
+.dropdown__btn {
+    width: 100% !important;
+    background: var(--mc-btn) !important;
+    border: 3px solid var(--mc-border-black) !important;
+    box-shadow: inset 3px 3px 0px var(--mc-border-light), inset -3px -3px 0px var(--mc-border-dark) !important;
+    font-size: 0.85rem !important; /* Matching other buttons */
+    color: var(--mc-text) !important;
+    text-shadow: 2px 2px 0px #000 !important;
+    border-radius: 0 !important;
+    padding: 20px !important; /* Thicker */
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-family: 'Press Start 2P', monospace !important;
+    outline: none !important;
+}
+
+.dropdown__menu {
+    width: 100% !important;
+    background: var(--mc-panel) !important;
+    border: 3px solid var(--mc-border-black) !important;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.8) !important;
+    z-index: 1000 !important;
+}
+.dropdown__btn::after {
+    border-top-color: var(--mc-text) !important;
+    margin-left: 10px !important;
+}
+.dropdown__menu {
+    background: var(--mc-panel) !important;
+    border: 3px solid var(--mc-border-black) !important;
+    border-radius: 0 !important;
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.8) !important;
+    padding: 0 !important;
+    width: 280px !important;
+    max-width: 90vw !important;
+    z-index: 1000 !important;
+    left: auto !important; /* Align to button's edge */
+    right: 0 !important;
+}
+.dropdown__item {
+    font-size: 0.7rem !important;
+    color: var(--mc-text) !important;
+    text-shadow: 2px 2px 0px #000 !important;
+    padding: 16px 20px !important;
+    white-space: nowrap !important; /* Prevent wrapping */
+}
+.dropdown__item:hover, .dropdown__item--active {
+    background: var(--mc-btn-hover) !important;
+    color: var(--mc-green) !important;
+    border-radius: 0 !important;
+}
+
+/* Tabs */
+.tabs { border-bottom: 3px solid var(--mc-border-dark); gap: 4px; margin-bottom: 20px; }
+.tab {
+    background: #111;
+    color: #777;
+    text-shadow: 2px 2px 0px #000;
+    border: 3px solid var(--mc-border-black);
+    border-bottom: none;
+    box-shadow: inset 3px 3px 0px var(--mc-border-dark);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+.tab--active {
+    background: var(--mc-panel) !important;
+    color: var(--mc-yellow) !important;
+    box-shadow: inset 3px 3px 0px var(--mc-border-light) !important;
+    z-index: 2;
+    padding-bottom: 22px !important;
+    margin-bottom: -3px;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 16px; height: 16px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { 
+    background: var(--mc-btn); 
+    border: 2px solid var(--mc-border-black); 
+    box-shadow: inset 2px 2px 0px var(--mc-border-light), inset -2px -2px 0px var(--mc-border-dark);
+}

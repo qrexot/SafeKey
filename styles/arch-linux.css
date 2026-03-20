@@ -1,0 +1,226 @@
+/* Arch Linux Terminal Theme */
+:root {
+    /* Pure Black / Dark Grey */
+    --bg1: #000000;      /* Pure black background */
+    --bg2: #0a0a0a;      /* Panels slightly offset */
+    --bg3: #000000;      /* Inputs */
+    
+    /* Arch Colors */
+    --c-txt: #e6e6e6;    /* Light grey term text */
+    --c-txt2: #888888;   /* Dimmed text */
+    --c-acc: #1793d1;    /* Arch Blue accent */
+    --c-acc-hov: #137ab0;/* Darker Arch Blue */
+    --term-green: #23d18b; /* Matrix/terminal green for success/prompts */
+    
+    --c-danger: #f7768e; /* Terminal red */
+    --c-warn: #e0af68;   /* Terminal yellow */
+    --c-ok: #23d18b;     /* Terminal green */
+
+    --bg-acc: rgba(23, 147, 209, 0.15);
+    
+    /* Standard 1px solid borders */
+    --border: 1px solid #333333;       
+
+    /* Strict Monospace */
+    --font-ui: 'JetBrains Mono', 'Courier New', monospace;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+    /* Zero rounding - stark console look */
+    --rad: 0px;
+    --rad-sm: 0px;
+    --rad-lg: 0px;
+
+    /* No blur, solid block shadows */
+    --sh-btn: 2px 2px 0px rgba(23, 147, 209, 0.5); /* Blue solid drop shadow */
+    --sh-card: 3px 3px 0px #333333;
+    --sh-ov: 0 0 0 100vw rgba(0,0,0,0.8), 5px 5px 0px #1793d1;
+}
+
+/* Global Reset for Theme */
+body {
+    background-color: var(--bg1);
+    color: var(--c-txt);
+    font-family: var(--font-ui);
+    margin: 0;
+    cursor: text; /* Terminal cursor logic */
+}
+
+/* Make everything look like a command line interface */
+h1, h2, h3, .nav__brand, .panel__head h2, .auth__title {
+    font-weight: 700;
+    color: var(--c-acc);
+    text-transform: lowercase; /* Unix style */
+}
+
+/* Add prompts to headings */
+.nav__brand::before, h2::before, .auth__title::before {
+    content: "[root@arch ~]# ";
+    color: var(--term-green);
+    font-weight: normal;
+}
+.panel__head h2::before {
+    content: "[user@arch view]$ ";
+}
+.ov__box h2::before {
+    content: "[user@arch sudo]$ ";
+    color: var(--c-danger);
+}
+
+/* Specific component overrides */
+.auth__icon { stroke: var(--c-acc); }
+.auth__tag { color: var(--term-green); font-family: var(--font-mono); }
+
+/* Buttons as console action blocks */
+.btn {
+    border-radius: var(--rad);
+    text-transform: lowercase;
+    font-weight: bold;
+    letter-spacing: 0px;
+    box-shadow: none;
+    border: 1px solid var(--c-acc);
+    transition: none; /* No smooth transition in terminal */
+    position: relative;
+}
+
+.btn::before {
+    content: "> ";
+    color: inherit;
+    opacity: 0.5;
+}
+
+.btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+    background-color: var(--c-acc-hov);
+}
+
+.btn--w {
+    background: var(--c-acc);
+    color: var(--bg1);
+    border-color: var(--c-acc);
+}
+
+.btn--w:hover {
+    background: var(--bg1);
+    color: var(--c-acc);
+    box-shadow: inset 0 0 0 1px var(--c-acc);
+}
+
+.btn--o {
+    background: transparent;
+    color: var(--c-acc);
+    border-color: var(--c-acc);
+}
+
+.btn--o:hover {
+    background: var(--c-acc);
+    color: var(--bg1);
+}
+
+/* Inputs acting like terminal prompts */
+.inp {
+    background: var(--bg3);
+    border: none;
+    border-bottom: 2px solid #555;
+    color: var(--term-green);
+    border-radius: var(--rad);
+    font-family: var(--font-mono);
+    padding-left: 0;
+}
+
+.inp:focus {
+    border-color: var(--c-acc);
+    box-shadow: none;
+    outline: none;
+}
+
+.inp-wrap svg { display: none; } /* Hide icons in input wrappers for raw text feel */
+
+/* Cards looking like neofetch output or file listings */
+.card {
+    background: var(--bg1);
+    border: 1px dashed #555;
+    border-radius: var(--rad);
+    box-shadow: none;
+    transition: none;
+}
+
+.card:hover {
+    transform: none;
+    border-color: var(--term-green);
+    border-style: solid;
+    background: var(--bg2);
+}
+
+.card__icon {
+    border-radius: 0;
+    background: transparent;
+    border: 1px solid var(--c-acc);
+    color: var(--c-acc);
+}
+.card__icon svg { stroke: var(--c-acc); }
+.card__name { color: var(--c-acc); font-weight: bold; }
+.card__name::after { content: "*"; color: var(--term-green); }
+
+/* Nav */
+.nav {
+    background: var(--bg1);
+    border-bottom: 1px solid var(--c-acc);
+}
+
+/* Modals / Panels */
+.panel, .ov__box {
+    background: var(--bg1);
+    border: 2px solid var(--c-acc);
+    border-radius: var(--rad);
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.9);
+}
+
+/* Tabs */
+.tab {
+    font-family: var(--font-mono);
+    text-transform: lowercase;
+    border-bottom: 1px solid transparent;
+    opacity: 0.5;
+}
+.tab::before { content: "./"; }
+.tab--active {
+    color: var(--term-green);
+    border-bottom-color: var(--term-green);
+    opacity: 1;
+}
+
+/* Spinners -> blinking cursor block */
+.spin {
+    border: none;
+    width: 10px;
+    height: 20px;
+    background: var(--term-green);
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg1); border-left: 1px solid #333; }
+::-webkit-scrollbar-thumb { background: #555; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-acc); }
+
+/* Dropdowns */
+.dropdown {
+    position: relative;
+    z-index: 1;
+}
+.dropdown--open {
+    z-index: 100 !important;
+}
+.dropdown__menu {
+    border-radius: 0;
+    border: 1px solid var(--c-acc);
+    background: var(--bg1);
+}
+.dropdown__item:hover, .dropdown__item--active {
+    background: var(--c-acc);
+    color: var(--bg1);
+    border-radius: 0;
+}
